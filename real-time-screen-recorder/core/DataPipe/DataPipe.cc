@@ -49,6 +49,7 @@ void DataPipe::receive(const std::string& in_info) {
 }
 
 void DataPipe::manageConnectionAndSendData() {
+    /*
     while (true) {
         if (!this->new_cropped_data_ready_flag) { continue; }
         LOG(INFO) << "Sending data...";
@@ -57,6 +58,7 @@ void DataPipe::manageConnectionAndSendData() {
         this->new_cropped_data_ready_flag = false;
         LOG(INFO) << "Data sent.";
     }
+    */
 }
 
 /*

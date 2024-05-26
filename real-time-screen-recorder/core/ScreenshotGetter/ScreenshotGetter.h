@@ -1,11 +1,13 @@
 #ifndef SCREENSHOTGETTER_SCREENSHOTGETTER_H_
 #define SCREENSHOTGETTER_SCREENSHOTGETTER_H_
 
+#include <windows.h>
 #include "util/util.h"
 #include "util/data/CroppedScreenshot.hpp"
 
 #include <ini.h>
 #include "INIReader.h"
+#include <opencv2/opencv.hpp>
 
 //struct UltrasoundVolume : public IData {};
 //struct UltrasoundImage : public IData {};

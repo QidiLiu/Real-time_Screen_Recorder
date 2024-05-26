@@ -62,14 +62,42 @@ void ScreenshotGetter::receive(const std::string& in_info) {
 
 void ScreenshotGetter::recordScreenshotAndCrop() {
     LOG(INFO) << "Starting infinite loop to record screenshot...";
-    while (true) {
-        LOG(INFO) << "Getting screenshot...";
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // [DEBUG] simulation time
-        LOG(INFO) << "Cropping out region of interest...";
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // [DEBUG] simulation time
+    cv::Mat test_mat;
+    HDC screen_hdc = GetDC(NULL);
+    int screen_width = GetDeviceCaps(screen_hdc, HORZRES);
+    int screen_height = GetDeviceCaps(screen_hdc, VERTRES);
+    if ((this->crop_x + this->crop_w) > screen_width || (this->crop_y + this->crop_h) > screen_height) {
+        LOG(ERROR) << "Crop size is larger than screen size";
+        return;
+    }
+
+    HBITMAP hbmp = CreateCompatibleBitmap(screen_hdc, this->crop_w, this->crop_h);
+    HDC memory_hdc = CreateCompatibleDC(screen_hdc);
+    SelectObject(memory_hdc, hbmp);
+    BitBlt(memory_hdc, this->crop_x, this->crop_y, this->crop_w, this->crop_h, screen_hdc, 0, 0, SRCCOPY);
+
+    BITMAP bmp = {};
+    GetObject(hbmp, sizeof(BITMAP), &bmp);
+    int channel_num = bmp.bmBitsPixel == 1 ? 1 : bmp.bmBitsPixel / 8;
+    test_mat.create(cv::Size(this->crop_w, this->crop_h), CV_MAKETYPE(CV_8U, channel_num));
+
+    while (cv::waitKey(1) != 'q') {
+        //LOG(INFO) << "Getting screenshot...";
+        //LOG(INFO) << "bmp.bmWidth: " << bmp.bmWidth << " bmp.bmHeight: " << bmp.bmHeight << ", channel num: " << channel_num;
+
+        BitBlt(memory_hdc, 0, 0, this->crop_w, this->crop_h, screen_hdc, this->crop_x, this->crop_y, SRCCOPY);
+        GetBitmapBits(hbmp, this->crop_h * this->crop_w * channel_num, test_mat.data);
+        cv::imshow("screenshot", test_mat);
+
         absl::WriterMutexLock lock(&this->cropped_screenshot->mtx);
+        // TODO: write data to cropped_screenshot
         this->send("cropped_screenshot", "new_screenshot_was_cropped");
     }
+
+    cv::destroyAllWindows();
+    DeleteObject(hbmp);
+    DeleteDC(memory_hdc);
+    ReleaseDC(NULL, screen_hdc);
 }
 
 /*

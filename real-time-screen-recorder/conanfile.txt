@@ -1,6 +1,7 @@
 [requires]
     abseil/20230125.3
     inih/58
+    opencv/4.9.0
 
 [generators]
     CMakeDeps
