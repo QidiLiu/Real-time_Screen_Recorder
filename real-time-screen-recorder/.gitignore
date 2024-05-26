@@ -1,0 +1,14 @@
+.vs
+.vscode
+.venv
+doc
+struct
+out
+dist
+build
+backup
+__pycache__
+*.spec
+*.pyd
+
+CMakeUserPresets.json
